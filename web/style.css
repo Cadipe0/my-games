@@ -1,0 +1,1576 @@
+/* ============================================================
+   공통 다크 테마 — 게임 모음
+   ============================================================ */
+
+:root {
+  --bg: #0d1117;
+  --surface: #151a22;
+  --surface-2: #1c222c;
+  --line: #262e3a;
+  --text: #e6edf3;
+  --muted: #8b96a5;
+  --accent: #5eead4;
+  --accent-2: #a78bfa;
+  --warn: #f0b072;
+  --danger: #f2777a;
+
+  --board-bg: #212936;
+  --grid: rgba(230, 237, 243, 0.22);
+
+  --cell: clamp(20px, calc((100vw - 72px) / 15), 34px);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+/* HTML 의 hidden 속성은 브라우저 기본 display:none 으로 동작하는데,
+   .modal{display:grid} 같은 작성자 규칙이 그걸 덮어쓴다.
+   hidden 을 항상 이기게 해서 JS 의 el.hidden 토글이 실제로 먹히도록 한다. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic",
+               system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 40rem at 15% -10%, rgba(94, 234, 212, 0.10), transparent 60%),
+    radial-gradient(50rem 35rem at 95% 5%, rgba(167, 139, 250, 0.10), transparent 60%);
+  z-index: -1;
+}
+
+.shell {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(1rem, 4vw, 2.2rem) 1rem 3rem;
+}
+
+/* ---------- 상단바 ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+.back {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.back:hover { color: var(--text); border-color: var(--muted); }
+.page-title { font-size: 1.15rem; margin: 0; }
+
+/* ---------- 버튼 ---------- */
+.btn {
+  display: inline-block;
+  padding: 0.62rem 1.15rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.btn:hover { background: #232b37; }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.45; cursor: default; transform: none; }
+
+.btn.primary { background: var(--accent); color: #06251f; }
+.btn.primary:hover { background: #7df3e0; }
+.btn.ghost { background: transparent; border-color: var(--line); }
+.btn.ghost:hover { background: transparent; border-color: var(--muted); }
+.btn.small { padding: 0.45rem 0.95rem; font-size: 0.85rem; }
+.btn.danger {
+  background: transparent;
+  border-color: rgba(242, 119, 122, 0.45);
+  color: var(--danger);
+}
+.btn.danger:hover { background: rgba(242, 119, 122, 0.10); border-color: var(--danger); }
+.btn.danger.armed { background: var(--danger); color: #2a0b0c; border-color: var(--danger); }
+
+/* 세로로 쌓이는 선택지 버튼.
+   .primary / .ghost 변형은 제외해야 한다. 특이도가 같아서 뒤에 오는 이 규칙이
+   변형의 배경색을 덮어쓰면 글자색만 남아 버튼이 보이지 않게 된다. */
+.choices { display: flex; flex-direction: column; gap: 0.55rem; }
+.choices .btn:not(.primary):not(.ghost) {
+  border-radius: 10px;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-color: var(--line);
+  background: var(--surface-2);
+  font-weight: 500;
+}
+.choices .btn:not(.primary):not(.ghost):hover { border-color: var(--accent); }
+.choices .btn .idx { color: var(--accent); font-weight: 700; margin-right: 0.5rem; }
+
+.row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+
+/* ---------- 패널 ---------- */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: clamp(1rem, 3vw, 1.6rem);
+}
+.panel + .panel { margin-top: 1rem; }
+
+.hint { color: var(--muted); font-size: 0.88rem; margin: 0 0 1rem; }
+
+/* ---------- 로그 ---------- */
+.log {
+  background: #10151c;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0;
+  max-height: 260px;
+  overflow-y: auto;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+.log p { margin: 0.15rem 0; color: var(--muted); }
+.log p.hi { color: var(--text); }
+.log p.good { color: var(--accent); font-weight: 600; }
+.log p.bad { color: var(--danger); font-weight: 600; }
+.log p.note { color: var(--warn); }
+.log p.step {
+  color: var(--text);
+  font-weight: 600;
+  margin-top: 0.7rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- 입력 ---------- */
+.field {
+  background: #10151c;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--text);
+  font: inherit;
+  padding: 0.55rem 0.9rem;
+  width: 8rem;
+}
+.field:focus { outline: 2px solid rgba(94, 234, 212, 0.5); outline-offset: 1px; }
+
+/* ============================================================
+   허브 (게임 목록)
+   ============================================================ */
+.hub-head { text-align: center; margin-bottom: 2.2rem; }
+.hub-head h1 {
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.02em;
+}
+.hub-head h1 em {
+  font-style: normal;
+  background: linear-gradient(100deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hub-head p { color: var(--muted); margin: 0; }
+
+.hub-greet { min-height: 1.7em; }
+
+/* 랭킹 · 이름 바꾸기. 이름을 아직 안 정했으면 랭킹 버튼만 가운데 남는다. */
+.hub-actions { justify-content: center; margin-top: 0.6rem; }
+
+/* ---------- 닉네임 화면 ---------- */
+.nick-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(5, 8, 12, 0.78);
+  backdrop-filter: blur(4px);
+  animation: nick-in 0.18s ease-out;
+}
+@keyframes nick-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.nick-box {
+  width: min(420px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+}
+.nick-title {
+  margin: 0 0 0.4rem;
+  font-size: 1.15rem;
+}
+.nick-hint { margin: 0 0 1rem; }
+
+.nick-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  font: inherit;
+  font-size: 1.05rem;
+  text-align: center;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.nick-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.18);
+}
+.nick-input::placeholder { color: var(--muted); }
+
+.nick-error {
+  margin: 0.6rem 0 0;
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+.nick-actions {
+  margin-top: 1.1rem;
+  justify-content: center;
+}
+
+.hub-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));   /* 한 줄에 4개 */
+}
+@media (max-width: 1040px) { .hub-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 800px)  { .hub-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.game-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.3rem;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.game-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+.game-card .icon { font-size: 1.8rem; line-height: 1; }
+.game-card h2 { font-size: 1.05rem; margin: 0.6rem 0 0.35rem; }
+.game-card p { margin: 0 0 0.9rem; color: var(--muted); font-size: 0.88rem; }
+.game-card .meta {
+  font-size: 0.72rem;
+  color: var(--accent);
+  border: 1px solid rgba(94, 234, 212, 0.35);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+}
+
+/* 카드에 붙는 최고 기록 한 줄. 기록이 없으면 아예 나타나지 않는다
+   (hidden 이 걸린 채로 둔다). */
+.game-card .card-record {
+  display: block;
+  margin-top: 0.7rem;
+  font-size: 0.78rem;
+  color: var(--accent-2);
+}
+
+/* ============================================================
+   기록 — 게임 안에서 보여 주는 줄
+   ============================================================ */
+
+.record-line {
+  margin: 0.7rem 0 0;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--muted);
+  min-height: 1.4em;
+}
+
+/* 난이도별로 여러 줄을 늘어놓는 자리 */
+.record-list {
+  margin: 1.4rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+.record-list .record-line {
+  margin: 0.3rem 0;
+  min-height: 0;
+}
+
+/* ============================================================
+   오목
+   ============================================================ */
+.game-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.players { display: flex; align-items: center; gap: 0.9rem; }
+
+.player {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.9rem;
+  color: var(--muted);
+  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+.player.active {
+  color: var(--text);
+  border-color: rgba(94, 234, 212, 0.4);
+  background: rgba(94, 234, 212, 0.08);
+}
+
+.dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+.dot.black { background: radial-gradient(circle at 32% 28%, #5a626e, #0b0e13 70%); }
+.dot.white { background: radial-gradient(circle at 32% 28%, #ffffff, #b6bec9 75%); }
+
+.vs { color: var(--muted); font-size: 0.75rem; letter-spacing: 0.1em; }
+
+/* 난이도 세그먼트 버튼 */
+.head-actions { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+
+.difficulty { display: flex; align-items: center; gap: 0.5rem; }
+.diff-label { color: var(--muted); font-size: 0.78rem; letter-spacing: 0.06em; }
+
+.seg {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.seg-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  font: inherit;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease;
+}
+.seg-btn:hover { color: var(--text); }
+.seg-btn[aria-pressed="true"] {
+  background: rgba(94, 234, 212, 0.14);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.board-wrap { display: flex; justify-content: center; position: relative; }
+
+/* 판을 덮는 시작 카드 — 난이도를 고르기 전에는 판이 움직이지 않는다 */
+.start-gate {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  border-radius: 8px;
+  background: rgba(13, 17, 23, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.start-box {
+  width: min(340px, 92%);
+  padding: 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  text-align: center;
+}
+
+.start-title { margin: 0 0 0.9rem; font-size: 1.05rem; }
+.start-box .choices { text-align: left; }
+.start-note { margin: 0.9rem 0 0; color: var(--muted); font-size: 0.8rem; }
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(15, var(--cell));
+  grid-template-rows: repeat(15, var(--cell));
+  background: var(--board-bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: calc(var(--cell) / 2);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  touch-action: manipulation;
+}
+
+.cell { position: relative; cursor: pointer; background: none; border: 0; padding: 0; }
+.board.locked .cell { cursor: default; }
+
+.cell::before,
+.cell::after { content: ""; position: absolute; background: var(--grid); }
+.cell::before { left: 0; right: 0; top: 50%; height: 1px; transform: translateY(-0.5px); }
+.cell::after { top: 0; bottom: 0; left: 50%; width: 1px; transform: translateX(-0.5px); }
+
+.cell:nth-child(15n + 1)::before { left: 50%; }
+.cell:nth-child(15n)::before { right: 50%; }
+.cell:nth-child(-n + 15)::after { top: 50%; }
+.cell:nth-child(n + 211)::after { bottom: 50%; }
+
+.cell.star {
+  background-image: radial-gradient(circle at 50% 50%, var(--grid) 0 2.5px, transparent 2.6px);
+}
+
+.stone {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--cell) * 0.86);
+  height: calc(var(--cell) * 0.86);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0.6);
+  opacity: 0;
+  transition: transform 0.14s ease, opacity 0.14s ease;
+  z-index: 1;
+}
+.cell.filled .stone { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+
+.stone.black {
+  background: radial-gradient(circle at 32% 28%, #4d5563, #0a0d12 72%);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.stone.white {
+  background: radial-gradient(circle at 32% 28%, #ffffff, #aab3bf 78%);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.cell.last .stone::after {
+  content: "";
+  position: absolute;
+  inset: 28%;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px rgba(94, 234, 212, 0.8);
+}
+
+.cell.win .stone {
+  box-shadow: 0 0 0 2px var(--accent), 0 0 14px rgba(94, 234, 212, 0.7);
+  animation: pop 1.1s ease-in-out infinite alternate;
+}
+@keyframes pop {
+  from { transform: translate(-50%, -50%) scale(1); }
+  to   { transform: translate(-50%, -50%) scale(1.12); }
+}
+
+.board:not(.locked) .cell:not(.filled):hover .stone {
+  opacity: 0.32;
+  transform: translate(-50%, -50%) scale(0.92);
+}
+
+.status {
+  margin: 1.2rem 0 0;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--muted);
+  min-height: 1.7em;
+}
+.status.win { color: var(--accent); font-weight: 600; }
+.status.lose { color: var(--accent-2); font-weight: 600; }
+.status.draw { color: var(--text); font-weight: 600; }
+
+/* ============================================================
+   숫자 맞추기
+   ============================================================ */
+.guess-range {
+  text-align: center;
+  font-size: 1.05rem;
+  margin: 0 0 0.3rem;
+}
+.guess-range strong { color: var(--accent); }
+.tries { text-align: center; color: var(--muted); font-size: 0.85rem; margin: 0 0 1rem; }
+
+.hint-big {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  min-height: 1.6em;
+  margin: 0.6rem 0;
+}
+.hint-big.up { color: var(--accent); }
+.hint-big.down { color: var(--accent-2); }
+.hint-big.hit { color: var(--accent); }
+
+/* ============================================================
+   블랙잭
+   ============================================================ */
+.bj-table { margin-bottom: 0.4rem; }
+
+.hand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  padding: 0.7rem 0;
+}
+.hand-row + .hand-row { border-top: 1px solid var(--line); }
+.hand-label { width: 4.5rem; color: var(--muted); font-size: 0.9rem; flex: none; }
+.hand { display: flex; gap: 0.4rem; flex-wrap: wrap; flex: 1 1 auto; min-height: 62px; }
+.hand-total { font-variant-numeric: tabular-nums; font-weight: 600; }
+.hand-total .dist { color: var(--muted); font-weight: 400; font-size: 0.82rem; margin-left: 0.4rem; }
+
+.pcard {
+  width: 44px;
+  height: 62px;
+  border-radius: 7px;
+  background: linear-gradient(160deg, #ffffff, #dfe4ea);
+  color: #10151c;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 1.05rem;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+  animation: deal 0.18s ease-out;
+}
+.pcard.hidden-card {
+  background: repeating-linear-gradient(45deg, #2b3444, #2b3444 5px, #222a37 5px, #222a37 10px);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+@keyframes deal {
+  from { transform: translateY(-8px) scale(0.9); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+
+.chips-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--surface-2);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+.chips-row .bet { color: var(--warn); }
+
+/* ============================================================
+   텍스트 어드벤처
+   ============================================================ */
+.story-text {
+  white-space: pre-wrap;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+  min-height: 4.5em;
+}
+
+.hud {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 1.1rem;
+  background: var(--surface-2);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.hpbar {
+  flex: 1 1 140px;
+  height: 8px;
+  min-width: 100px;
+  background: #10151c;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.hpbar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #35c8ad);
+  transition: width 0.3s ease;
+}
+.hpbar.low i { background: linear-gradient(90deg, var(--danger), #d05f62); }
+.hud .tag { color: var(--text); }
+
+.ending {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 1.2rem 0 0.4rem;
+}
+.ending.good { color: var(--accent); }
+.ending.bad { color: var(--accent-2); }
+.ending.over { color: var(--danger); }
+
+/* 본문 타자기 커서 */
+.story-text.typing { cursor: pointer; }
+.story-text.typing::after {
+  content: "▌";
+  color: var(--accent);
+  animation: blink 0.9s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* 시간대에 따른 배경 */
+body[data-time] { transition: background-color 1.5s ease; }
+body[data-time="dusk"] { background: #14100f; }
+body[data-time="dusk"]::before {
+  background:
+    radial-gradient(60rem 40rem at 20% -10%, rgba(240, 176, 114, 0.13), transparent 60%),
+    radial-gradient(50rem 35rem at 90% 10%, rgba(167, 139, 250, 0.10), transparent 60%);
+}
+body[data-time="night"] { background: #070a10; }
+body[data-time="night"]::before {
+  background:
+    radial-gradient(70rem 45rem at 50% -20%, rgba(94, 122, 234, 0.14), transparent 65%),
+    radial-gradient(40rem 30rem at 10% 90%, rgba(167, 139, 250, 0.08), transparent 60%);
+}
+body[data-time="dawn"] { background: #0b1116; }
+body[data-time="dawn"]::before {
+  background:
+    radial-gradient(60rem 40rem at 30% -10%, rgba(94, 234, 212, 0.13), transparent 60%),
+    radial-gradient(50rem 35rem at 95% 15%, rgba(240, 176, 114, 0.10), transparent 60%);
+}
+
+/* 소지품 바 */
+.inv-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.item .ico { font-size: 1rem; }
+.item:hover { color: var(--text); border-color: var(--muted); }
+.item.usable { color: var(--text); border-color: rgba(94, 234, 212, 0.45); }
+.item.usable:hover { border-color: var(--accent); background: rgba(94, 234, 212, 0.10); }
+
+/* 적 체력 */
+.enemy {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 0.88rem;
+}
+.enemy.telegraph { border-color: var(--warn); box-shadow: 0 0 0 1px rgba(240, 176, 114, 0.35); }
+.enemy-name { flex: none; }
+.enemy-bar {
+  flex: 1 1 140px;
+  min-width: 100px;
+  height: 8px;
+  background: #10151c;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.enemy-bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--danger), #b8484b);
+  transition: width 0.3s ease;
+}
+.enemy-hp { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* 잠긴 선택지 */
+.choices .btn.locked {
+  opacity: 0.5;
+  cursor: default;
+  border-style: dashed;
+}
+.choices .btn.locked:hover { border-color: var(--line); }
+.lock-reason {
+  float: right;
+  color: var(--warn);
+  font-size: 0.78rem;
+}
+
+/* 엔딩 도감 */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(5, 8, 12, 0.72);
+  backdrop-filter: blur(4px);
+}
+.modal-box {
+  width: min(680px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+}
+.modal-head h2 { font-size: 1.1rem; margin: 0; }
+
+.codex-grid {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  margin-bottom: 1rem;
+}
+.codex-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: 0.85rem;
+}
+.codex-card.unknown { opacity: 0.5; border-style: dashed; }
+.codex-kind { font-size: 0.72rem; color: var(--muted); }
+.codex-card.good .codex-kind { color: var(--accent); }
+.codex-card.bad .codex-kind { color: var(--accent-2); }
+.codex-card.over .codex-kind { color: var(--danger); }
+.codex-title { font-weight: 600; }
+.codex-count { font-size: 0.72rem; color: var(--muted); }
+
+/* ============================================================
+   티카투카 (가로 배치 주사위 대결)
+   ============================================================ */
+.shell.wide { max-width: 1180px; }
+
+.tk-head {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+  font-size: 0.9rem;
+}
+.tk-streak {
+  color: var(--warn);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(240, 176, 114, 0.12);
+  border: 1px solid rgba(240, 176, 114, 0.4);
+}
+/* 연승이 없을 때는 자리만 지키고 눈에 띄지 않게 */
+.tk-streak.none {
+  color: var(--muted);
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.12);
+  font-weight: 600;
+}
+
+.tk-streak.hot {
+  color: var(--danger);
+  background: rgba(242, 119, 122, 0.14);
+  border-color: rgba(242, 119, 122, 0.5);
+  animation: streak-glow 1.4s ease-in-out infinite;
+}
+@keyframes streak-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(242, 119, 122, 0.5); }
+  50% { box-shadow: 0 0 0 7px rgba(242, 119, 122, 0); }
+}
+
+.tk-level {
+  margin-left: auto;
+  color: var(--warn);
+  border: 1px solid rgba(240, 176, 114, 0.35);
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+/* 이름줄 — 보드와 같은 3등분 격자를 쓴다 */
+.tk-names,
+.tk-row {
+  display: grid;
+  /* 가운데(점수·승패)가 눌려 숫자가 잘리지 않도록 최소 폭을 준다 */
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 0.5fr) minmax(0, 1fr);
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.tk-names { margin-bottom: 0.5rem; font-size: 0.9rem; }
+.tk-who { display: flex; align-items: center; gap: 0.4rem; font-weight: 600; }
+.tk-who.me { color: var(--accent); }
+.tk-who.npc { color: var(--accent-2); justify-content: flex-end; }
+.tk-mid-label { text-align: center; color: var(--muted); font-size: 0.75rem; }
+.tk-specials { color: var(--muted); font-size: 0.78rem; font-weight: 400; }
+
+.tk-rows { display: grid; gap: 0.6rem; }
+
+/* 한쪽 3칸 */
+.tk-cells {
+  --tk-gap: clamp(8px, 1.6vw, 18px);   /* 주사위 사이 간격 = 보너스 주사위가 놓일 자리 */
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-width: 0;
+  gap: var(--tk-gap);
+  padding: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #10151c;
+  font: inherit;
+  cursor: default;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.tk-cells.playable { cursor: pointer; }
+.tk-cells.playable:hover { border-color: var(--accent); background: rgba(94, 234, 212, 0.07); }
+.tk-cells.act-knock { border-color: rgba(242, 119, 122, 0.55); }
+.tk-cells.act-knock:hover { border-color: var(--danger); background: rgba(242, 119, 122, 0.10); }
+.tk-cells.act-special { border-color: rgba(94, 234, 212, 0.55); border-style: solid; }
+.tk-cells.act-special:hover { border-color: var(--accent); background: rgba(94, 234, 212, 0.10); }
+
+.tk-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 1;      /* 폭이 줄면 높이도 따라 줄어든다 */
+  min-width: 0;
+}
+
+/* 판 위 주사위 — 굴림판 큐브와 같은 재질의 눈(pip) 주사위 */
+.tk-cell .die {
+  width: 86%;
+  height: 86%;
+  border-width: 2px;
+}
+
+.pipface {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 6%;
+  padding: 13%;
+  border-radius: 22%;
+  background: linear-gradient(155deg, #ffffff, #ccd5de);
+  border: 2px solid rgba(0, 0, 0, 0.14);
+  box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.95),
+              inset 0 -3px 6px rgba(0, 0, 0, 0.16),
+              0 3px 6px rgba(0, 0, 0, 0.45);
+}
+.pipface i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #3b4552, #10151c 70%);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+.pipface b { display: none; }        /* 좁은 화면에서만 숫자로 바꾼다 */
+
+.pipface.mine { border-color: rgba(20, 160, 138, 0.8); }
+.pipface.mine i { background: radial-gradient(circle at 35% 30%, #23a693, #0a6f5e 70%); }
+.pipface.theirs { border-color: rgba(129, 96, 214, 0.8); }
+.pipface.theirs i { background: radial-gradient(circle at 35% 30%, #8f6be0, #5a34ad 70%); }
+
+/* 같은 눈 묶음을 한 덩어리로 감싸는 띠 */
+.group-band {
+  position: absolute;
+  top: -7%;
+  bottom: -7%;
+  left: -7%;
+  width: calc(100% * var(--n) + var(--tk-gap) * (var(--n) - 1) + 14%);
+  border-radius: 16%;
+  background: rgba(240, 176, 114, 0.12);
+  border: 1px solid rgba(240, 176, 114, 0.32);
+  box-shadow: inset 0 0 12px rgba(240, 176, 114, 0.12);
+  z-index: 0;
+  pointer-events: none;
+}
+.tk-cell .die { position: relative; z-index: 1; }
+
+/* 중복 보너스 — 두 주사위 사이 간격에 작게 끼워 넣는다 */
+.bonus-die {
+  position: absolute;
+  top: 50%;
+  right: calc(var(--tk-gap) / -2);
+  transform: translate(50%, -50%);
+  width: 46%;
+  aspect-ratio: 1 / 1;
+  padding: 11%;
+  gap: 5%;
+  z-index: 3;
+  border-style: dashed;
+  box-shadow: 0 0 8px rgba(240, 176, 114, 0.55), 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* 가운데 점수 / 승패 */
+.tk-mid {
+  display: grid;
+  grid-template-columns: minmax(2.2rem, auto) 1fr minmax(2.2rem, auto);
+  align-items: center;
+  gap: 0.45rem;
+  text-align: center;
+  overflow: visible;
+}
+.tk-sum.mine { color: #7ff0dd; }
+.tk-sum.theirs { color: #c3adfb; }
+.tk-sum {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 1.05rem;
+  min-width: 2.2rem;
+  white-space: nowrap;
+}
+.tk-line {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.3rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.tk-line.win { color: var(--accent); border-color: rgba(94, 234, 212, 0.4); }
+.tk-line.lose { color: var(--accent-2); border-color: rgba(167, 139, 250, 0.4); }
+
+/* ---------- 주사위 ---------- */
+.die {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(32px, 7vw, 46px);
+  height: clamp(32px, 7vw, 46px);
+  border-radius: 8px;
+  background: linear-gradient(160deg, #f7fafc, #d3dae2);
+  color: #10151c;
+  font-weight: 800;
+  font-size: clamp(0.95rem, 3.2vw, 1.15rem);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border: 2px solid transparent;
+}
+
+/* 누가 놓았는지 — 숫자색과 테두리로 구분 */
+.die.mine {
+  color: #0a6f5e;
+  border-color: rgba(20, 160, 138, 0.85);
+  background: linear-gradient(160deg, #f4fffd, #cfeae5);
+}
+.die.theirs {
+  color: #5a34ad;
+  border-color: rgba(129, 96, 214, 0.85);
+  background: linear-gradient(160deg, #faf7ff, #ded2f3);
+}
+
+/* 특수 주사위 — 테두리가 진하고 빛난다 */
+.pipface.special { border-style: solid; }
+.die.special {
+  border-width: 3px;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 12px rgba(94, 234, 212, 0.7),
+              inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.die.theirs.special {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 1px var(--accent-2), 0 0 12px rgba(167, 139, 250, 0.7),
+              inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* 지금 튕겨낼 수 있는 상대 주사위 */
+.die.target {
+  animation: target-pulse 1s ease-in-out infinite;
+}
+@keyframes target-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(242, 119, 122, 0.75), 0 2px 6px rgba(0, 0, 0, 0.45); }
+  50% { box-shadow: 0 0 0 6px rgba(242, 119, 122, 0), 0 2px 6px rgba(0, 0, 0, 0.45); }
+}
+
+.die.big { width: 58px; height: 58px; font-size: 1.6rem; border-radius: 11px; }
+.die.mini {
+  width: 18px; height: 18px; font-size: 0.65rem;
+  border-radius: 5px; display: inline-grid; vertical-align: -3px;
+}
+
+/* 칸에 내려앉는 순간 */
+.die.drop { animation: drop-in 0.36s cubic-bezier(.2,1.4,.4,1); }
+@keyframes drop-in {
+  0% { transform: translateY(-16px) scale(1.3) rotate(-12deg); }
+  60% { transform: translateY(2px) scale(0.94) rotate(3deg); }
+  100% { transform: none; }
+}
+
+/* ---------- 굴림판 주사위 (세로 릴) ---------- */
+.die-reel {
+  --die-size: clamp(40px, 5.6vw, 66px);
+  position: relative;
+  width: var(--die-size);
+  height: var(--die-size);
+  overflow: hidden;              /* 한 칸만 보이는 창 */
+  border-radius: 22%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  transition: opacity 0.2s ease;
+}
+.die-reel.idle { opacity: 0.32; }
+.die-reel.landed { box-shadow: 0 0 0 2px var(--accent), 0 4px 14px rgba(94, 234, 212, 0.45); }
+.die-reel.theirs.landed { box-shadow: 0 0 0 2px var(--accent-2), 0 4px 14px rgba(167, 139, 250, 0.45); }
+.die-reel.special { box-shadow: 0 0 0 2px var(--accent), 0 0 16px rgba(94, 234, 212, 0.6); }
+
+.reel-inner {
+  display: block;
+  will-change: transform;
+}
+
+/* 한번더 굴린 뒤 두 값을 나란히 보여 준다 */
+.die-pair {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(3px, 0.8vw, 10px);
+  max-width: 100%;
+}
+
+.die-alt {
+  --die-size: clamp(26px, 3.4vw, 52px);
+  box-sizing: border-box;
+  width: var(--die-size);
+  height: var(--die-size);
+  padding: 13%;
+  cursor: pointer;
+  opacity: 0.5;
+  filter: saturate(0.6);
+  transition: opacity 0.15s ease, transform 0.15s ease, filter 0.15s ease;
+}
+.die-alt:hover:not(:disabled) { opacity: 0.85; filter: none; transform: translateY(-2px); }
+.die-alt:disabled { cursor: default; }
+
+.die-reel.picked { box-shadow: 0 0 0 2px var(--accent), 0 4px 12px rgba(94, 234, 212, 0.4); }
+
+.reel-cell {
+  display: grid;
+  width: var(--die-size);
+  height: var(--die-size);
+  border-radius: 0;              /* 창 자체가 둥글게 잘라주므로 칸은 각지게 */
+  border: 0;                     /* 칸 사이 경계선이 보이지 않도록 */
+  box-shadow: none;
+}
+
+/* ---------- 굴림판 (양쪽 대칭) ---------- */
+.tk-arena {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(0.5rem, 2vw, 1rem);
+}
+
+.tk-tray {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  width: clamp(88px, 13vw, 156px);
+  padding: 0.7rem 0.5rem;
+  overflow: hidden;      /* 굴러 들어오거나 튀어오른 주사위는 여기서 잘린다 */
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  background:
+    radial-gradient(120% 80% at 50% 120%, rgba(255,255,255,0.05), transparent 70%),
+    repeating-linear-gradient(45deg, #11161e, #11161e 8px, #131922 8px, #131922 16px);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  opacity: 0.55;
+}
+.tk-tray.active { opacity: 1; }
+.tk-tray.me.active { border-color: rgba(94, 234, 212, 0.55); }
+.tk-tray.npc.active { border-color: rgba(167, 139, 250, 0.55); }
+.tk-tray.special {
+  border-style: solid;
+  box-shadow: 0 0 0 1px rgba(94, 234, 212, 0.45), 0 0 26px rgba(94, 234, 212, 0.3);
+}
+
+.tk-tray-label {
+  color: var(--muted);
+  font-size: clamp(0.6rem, 1.3vw, 0.74rem);
+  max-width: 100%;
+  text-align: center;
+  word-break: keep-all;     /* 라벨이 굴림판보다 넓어지지 않게 */
+}
+.tk-tray-owner { color: var(--muted); font-size: 0.85rem; }
+
+/* 굴러가는 자리 */
+/* 굴러가는 자리.
+   원근은 큐브 크기의 3배 안팎이어야 입체가 눈에 들어온다 (640px 은 거의 평행투영).
+   overflow 를 여기에 걸면 3D 가 한 평면으로 눌리고 튀어오른 윗부분도 잘리므로,
+   잘라내기는 바깥의 .tk-tray 가 맡는다. */
+.tk-track {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 5 / 4;
+  overflow: visible;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.3));
+  box-shadow: inset 0 -8px 16px rgba(0, 0, 0, 0.45);
+}
+
+.tk-tray.rolling { animation: tray-shake 0.24s linear infinite; }
+.tk-tray.rolling .reel-inner { filter: blur(0.4px); }
+@keyframes tray-shake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-1px, 1px); }
+  75% { transform: translate(1px, -1px); }
+}
+
+
+.tk-tray-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+}
+.tk-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-left: auto; }
+
+/* ---------- 상대 매칭 (룰렛) ---------- */
+.tk-match { text-align: center; }
+.tk-match-title {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.tk-reel {
+  position: relative;
+  height: 3.4rem;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #10151c;
+  margin-bottom: 1.2rem;
+}
+/* 위아래를 흐리게 해서 돌아가는 느낌을 준다 */
+.tk-reel::before,
+.tk-reel::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: 1.1rem;
+  z-index: 2;
+  pointer-events: none;
+}
+.tk-reel::before { top: 0; background: linear-gradient(#10151c, rgba(16, 21, 28, 0)); }
+.tk-reel::after { bottom: 0; background: linear-gradient(rgba(16, 21, 28, 0), #10151c); }
+
+.tk-reel-inner { will-change: transform; }
+.tk-reel-item {
+  height: 3.4rem;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.tk-reel-item.hit { color: var(--accent-2); }
+
+.tk-vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+.tk-vs.pop { animation: vs-pop 0.42s cubic-bezier(.2,1.5,.4,1); }
+@keyframes vs-pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+.tk-vs-side.me { color: var(--accent); }
+.tk-vs-side.npc { color: var(--accent-2); }
+.tk-vs-mark {
+  color: var(--muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.1rem 0.7rem;
+}
+.tk-vs-level { color: var(--warn); font-size: 0.85rem; margin: 0 0 1.2rem; }
+
+/* 굴리기 버튼이 기다리는 중이면 눈에 띄게 */
+#roll-btn.waiting { animation: roll-pulse 1.4s ease-in-out infinite; }
+@keyframes roll-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(94, 234, 212, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(94, 234, 212, 0); }
+}
+
+/* ---------- 연출 레이어 ---------- */
+.fx-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  overflow: hidden;
+}
+
+/* 굴림판에서 날아가는 주사위 */
+.fx-fly {
+  position: fixed;
+  width: 46px;
+  height: 46px;
+}
+
+/* 밀려나는 주사위 */
+.fx-die { position: fixed; }
+
+/* 고정 위치 요소는 퍼센트 패딩이 뷰포트 기준으로 잡혀 거대해진다.
+   자기 글꼴 크기를 기준으로 하는 em 으로 바꿔 원래 크기를 유지한다. */
+.fx-fly.pipface,
+.fx-die.pipface {
+  padding: 0.13em;
+  gap: 0.06em;
+  border-radius: 0.22em;
+}
+
+/* 충돌 섬광 */
+.fx-flash {
+  position: fixed;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95), rgba(242, 119, 122, 0.45) 45%, transparent 70%);
+  animation: flash 0.42s ease-out forwards;
+}
+@keyframes flash {
+  0% { transform: scale(0.3); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* 착지 고리 */
+.fx-ring {
+  position: fixed;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  animation: ring-out 0.45s ease-out forwards;
+}
+@keyframes ring-out {
+  0% { transform: scale(0.35); opacity: 0.9; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* 착지 먼지 */
+.fx-dust {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: rgba(210, 222, 235, 0.75);
+}
+
+/* 불꽃 */
+.fx-spark {
+  position: fixed;
+  width: 7px;
+  height: 7px;
+  margin: -3px 0 0 -3px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #fff2c9, #f2a35a);
+  box-shadow: 0 0 8px rgba(242, 163, 90, 0.9);
+}
+
+/* 부딪힌 줄이 흔들린다 */
+.tk-row.shake { animation: row-shake 0.36s ease; }
+@keyframes row-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-7px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(2px); }
+}
+
+.status.warn { color: var(--warn); }
+
+.tk-rules { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.9rem; color: var(--muted); }
+.tk-rules li { margin-bottom: 0.5rem; }
+.tk-rules b { color: var(--text); }
+.tk-rules .ex {
+  display: block;
+  color: var(--accent);
+  font-size: 0.82rem;
+  margin-top: 0.15rem;
+}
+
+
+/* ============================================================
+   반응형 — 태블릿 / 스마트폰
+   ============================================================ */
+
+/* 어떤 페이지에서도 가로 스크롤이 생기지 않도록 */
+.shell, .panel, .tk-arena, .tk-row, .tk-cells { max-width: 100%; }
+
+/* --- 태블릿 (≤ 900px) --- */
+@media (max-width: 900px) {
+  .shell { padding: 1rem 0.85rem 2.5rem; }
+  .panel { padding: 1rem; }
+  .page-title { font-size: 1.05rem; }
+  .hub-head h1 { font-size: clamp(1.6rem, 5.5vw, 2.2rem); }
+  .tk-head { font-size: 0.85rem; }
+  .tk-names, .tk-row { grid-template-columns: minmax(0, 1fr) minmax(120px, 0.5fr) minmax(0, 1fr); }
+}
+
+/* --- 스마트폰 가로 / 작은 태블릿 (≤ 700px) --- */
+@media (max-width: 700px) {
+  /* 오목판이 화면을 넘지 않도록 칸 크기를 다시 잡는다 */
+  :root { --cell: clamp(17px, calc((100vw - 104px) / 15), 34px); }
+
+  /* 티카투카 — 굴림판을 보드 위아래로 내린다 */
+  .tk-arena { grid-template-columns: minmax(0, 1fr); gap: 0.6rem; }
+  .tk-tray {
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    gap: 0.9rem;
+    padding: 0.5rem 0.7rem;
+  }
+  .tk-track { width: min(200px, 55%); aspect-ratio: 5 / 3; }
+  .tk-tray-label { white-space: nowrap; font-size: 0.72rem; }
+  .tk-tray-wrap { margin-top: 0.8rem; }
+  .tk-controls { margin-left: 0; width: 100%; justify-content: center; }
+
+  /* 블랙잭 */
+  .hand-row { padding: 0.55rem 0; }
+  .hand-label { width: 3.6rem; font-size: 0.82rem; }
+  .hand { min-height: 56px; }
+  .pcard { width: 38px; height: 54px; font-size: 0.95rem; }
+  .chips-row { font-size: 0.82rem; padding: 0.6rem 0.7rem; }
+
+  /* 엔딩 도감 */
+  .codex-grid { grid-template-columns: minmax(0, 1fr); }
+  .modal-box { padding: 1.1rem; }
+
+  /* 어드벤처 */
+  .hud { font-size: 0.8rem; gap: 0.6rem; }
+  .choices .btn:not(.primary):not(.ghost) { padding: 0.7rem 0.85rem; }
+  .lock-reason { float: none; display: block; margin-top: 0.2rem; }
+}
+
+/* --- 스마트폰 세로 (≤ 480px) --- */
+@media (max-width: 480px) {
+  .shell { padding: 0.8rem 0.6rem 2rem; }
+  .panel { padding: 0.8rem; }
+  .hub-grid { grid-template-columns: minmax(0, 1fr); }
+  .game-card { padding: 1rem; }
+
+  .topbar { flex-wrap: wrap; gap: 0.5rem; }
+  .page-title { font-size: 1rem; }
+
+  /* 티카투카 */
+  .tk-names, .tk-row { grid-template-columns: minmax(0, 1fr) 84px minmax(0, 1fr); gap: 0.3rem; }
+  .tk-cells { padding: 0.22rem; gap: 0.22rem; }
+  .tk-sum { min-width: 1.4rem; font-size: 0.85rem; }
+  .tk-line { font-size: 0.58rem; padding: 0.1rem 0.2rem; }
+  .tk-mid { gap: 0.2rem; grid-template-columns: minmax(1.4rem, auto) 1fr minmax(1.4rem, auto); }
+  .tk-track { width: min(170px, 58%); }
+
+  /* 판 위 주사위는 눈이 너무 작아지므로 숫자로 바꾼다 */
+  .pipface i { display: none; }
+  .pipface b {
+    display: grid;
+    place-items: center;
+    grid-area: 1 / 1 / 4 / 4;
+    color: #10151c;
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+  .pipface.mine b { color: #0a6f5e; }
+  .pipface.theirs b { color: #5a34ad; }
+  .bonus-die b { font-size: 0.6rem; }
+
+  /* 블랙잭 */
+  .pcard { width: 32px; height: 46px; font-size: 0.85rem; }
+  .hand { min-height: 48px; }
+
+  /* 숫자 맞추기 */
+  .hint-big { font-size: 1.3rem; }
+  .field { width: 6.5rem; }
+
+  /* 어드벤처 */
+  .story-text { font-size: 0.95rem; }
+  .ending { font-size: 1.05rem; }
+}
+
+/* --- 터치 기기 --- */
+@media (hover: none) {
+  .btn { min-height: 44px; }
+  .seg-btn { min-height: 40px; padding-left: 1rem; padding-right: 1rem; }
+  .back { min-height: 38px; display: inline-flex; align-items: center; }
+  .item { min-height: 38px; }
+  .tk-cells, .cell, .tk-cells * { -webkit-tap-highlight-color: transparent; }
+  /* 손가락으로는 hover 미리보기가 의미 없다 */
+  .board:not(.locked) .cell:not(.filled):hover .stone { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* ---------- 랭킹 ---------- */
+
+.rank-box {
+  margin: 1.4rem 0 0;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.rank-title {
+  margin: 0 0 0.7rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  text-align: center;
+}
+
+.rank-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* 등수 · 이름 · 한마디 · 점수. 가운데(한마디)만 늘어나서
+   이름이 길어져도 점수가 오른쪽 끝에 붙어 있는다. */
+.rank-row {
+  display: grid;
+  grid-template-columns: 1.9rem minmax(0, auto) 1fr auto;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.86rem;
+}
+
+.rank-row + .rank-row { margin-top: 0.15rem; }
+
+/* 내 기록은 배경으로 짚어 준다. 목록에서 나를 찾는 게 제일 잦은 일이다. */
+.rank-row.is-mine {
+  background: rgba(94, 234, 212, 0.09);
+  box-shadow: inset 0 0 0 1px rgba(94, 234, 212, 0.25);
+}
+
+.rank-no {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.rank-no.gold   { color: #f5c451; font-weight: 700; }
+.rank-no.silver { color: #c3ccd8; font-weight: 700; }
+.rank-no.bronze { color: #d9955f; font-weight: 700; }
+
+.rank-nick {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-row.is-mine .rank-nick { color: var(--accent); font-weight: 600; }
+
+.rank-note {
+  color: var(--muted);
+  font-size: 0.78rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-score {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ---------- 랭킹 페이지 (ranking.html) ---------- */
+
+.rank-page-head { text-align: center; margin-bottom: 1.8rem; }
+.rank-page-head h1 { font-size: clamp(1.5rem, 5vw, 2.1rem); margin: 0 0 0.4rem; }
+.rank-page-head p { color: var(--muted); margin: 0; font-size: 0.9rem; }
+
+/* 게임 수가 늘어도 알아서 접히도록 자동 열 배치를 쓴다. */
+.rank-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.rank-grid .rank-box { margin: 0; }
+
+.rank-empty {
+  margin: 0;
+  padding: 0.4rem 0.5rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+/* ---------- 기록 초기화 ---------- */
+
+/* 랭킹 표 아래에 조용히 놓인다. 자주 쓰는 버튼이 아니라서
+   가운데 정렬에 위쪽 여백만 준다. */
+.reset-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.9rem;
+}

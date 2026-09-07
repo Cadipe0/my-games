@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>블랙잭</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="shell">
+  <header class="topbar">
+    <a class="back" href="index.html">← 게임 목록</a>
+    <h1 class="page-title">블랙잭</h1>
+  </header>
+
+  <main class="panel">
+    <div class="bj-table" id="table" hidden>
+      <div class="hand-row">
+        <span class="hand-label">딜러</span>
+        <div class="hand" id="dealer-hand"></div>
+        <span class="hand-total" id="dealer-total"></span>
+      </div>
+      <div class="hand-row">
+        <span class="hand-label" id="player-label">플레이어</span>
+        <div class="hand" id="player-hand"></div>
+        <span class="hand-total" id="player-total"></span>
+      </div>
+    </div>
+
+    <div class="chips-row" id="chips" hidden></div>
+
+    <div class="log" id="log" hidden></div>
+
+    <div class="record-list" id="record" hidden></div>
+    <div id="ranking"></div>
+    <div id="record-reset"></div>
+
+    <div id="actions"></div>
+  </main>
+</div>
+
+<script src="nickname.js"></script>
+<script src="scores.js"></script>
+<script src="ranking-ui.js"></script>
+<script src="reset-ui.js"></script>
+<script src="highscore.js"></script>
+<script src="blackjack.js"></script>
+</body>
+</html>

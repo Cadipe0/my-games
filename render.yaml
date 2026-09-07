@@ -1,0 +1,28 @@
+# Render 배포 설정 (Blueprint).
+#
+# 대시보드에서 New > Blueprint 로 이 저장소를 고르면 이 파일대로 만들어진다.
+# 손으로 만들 때는 아래 값을 그대로 옮겨 적으면 된다.
+
+services:
+  - type: web
+    name: game-hub
+    runtime: python
+    plan: starter          # 기록을 남기려면 디스크가 필요하고, 디스크는 유료 플랜에만 붙는다
+    rootDir: server        # 서버 코드가 여기 있다. web/ 은 ../web 으로 알아서 찾는다
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+
+    # 기록이 저장되는 곳. 이게 없으면 배포하거나 재시작할 때마다 전부 사라진다.
+    disks:
+      - name: data
+        mountPath: /var/data
+        sizeGB: 1
+
+    envVars:
+      - key: DATA_DIR        # db.py 가 이 경로에 scores.db 를 만든다
+        value: /var/data
+      - key: PYTHON_VERSION
+        value: 3.13.15
+      # 필요할 때만 켠다 (기본은 닫혀 있다)
+      # - key: ENABLE_DOCS
+      #   value: "1"

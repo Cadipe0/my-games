@@ -1,0 +1,13 @@
+node_modules/
+coverage/
+
+# dist/ 는 올린다.
+#
+# 허브가 puzzle/dist/index.html 을 직접 가리키고, 배포 서버에는 Node 가 없어서
+# 거기서 빌드할 수 없다. 결과물이 파일 하나(inline.mjs 가 합쳐 준다)라서
+# 올려 두는 편이 낫다. 퍼즐 소스를 고치면 npm run build 를 다시 돌린 뒤
+# dist/index.html 도 같이 커밋해야 한다.
+*.local
+
+# 기존 파이썬 게임 잔여물
+__pycache__/

@@ -1,0 +1,1092 @@
+/* 화면 클래스 모음. SPEC §2 — CSS Modules */
+
+.page {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+}
+/* 플레이 화면만 넓힌다. 시작 화면의 소개글과 기록표까지 넓히면 글줄이 길어져
+   읽기 나빠진다. */
+.pageWide {
+  max-width: 64rem;
+}
+
+/* 기록을 불러오는 동안 잠깐 뜨는 줄 */
+.loading {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--chalk);
+}
+
+/* ---------- 플레이 화면 두 칸 배치 ---------- */
+
+.play {
+  display: grid;
+  gap: 1.25rem;
+}
+/* 격자(380) + 간격(20) + 옆칸(288) + 여백(32) ≈ 720px 이 최소.
+   여유를 두고 900px 부터 두 칸으로 나눈다. 그 아래는 세로로 쌓인다. */
+@media (min-width: 900px) {
+  .play {
+    grid-template-columns: minmax(0, 1fr) 18rem;
+    align-items: start;
+  }
+}
+.playMain {
+  min-width: 0;
+}
+.playSide {
+  min-width: 0;
+}
+
+.sideTitle {
+  margin: 0 0 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--chalk-dim);
+}
+.sideTitle + * {
+  margin-bottom: 1rem;
+}
+.sideBtns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--stone-2);
+}
+@media (min-width: 900px) {
+  .sideBtns .btn {
+    flex: 1 1 100%;
+  }
+  /* 세로로 쌓을 때는 flex-basis 가 '높이'로 해석된다. 가로 배치용으로 잡아 둔
+     12rem / 9rem 이 그대로 높이가 되면 카드가 길쭉하게 늘어난다. */
+  .hand {
+    flex-direction: column;
+  }
+  .hand .card {
+    flex: 0 0 auto;
+  }
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+.title {
+  margin: 0;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+  font-weight: 700;
+}
+.back {
+  font-size: 0.85rem;
+  color: var(--chalk-dim);
+  text-decoration: none;
+}
+.back:hover {
+  color: var(--chalk);
+}
+
+/* ---------- 버튼 ---------- */
+
+.btn {
+  background: var(--stone-2);
+  border: 1px solid var(--stone-edge);
+  border-radius: 2px;
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+  transition: background var(--dur) ease;
+}
+.btn:hover:not(:disabled) {
+  background: var(--stone-3);
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.btnQuiet {
+  background: transparent;
+  color: var(--chalk-dim);
+}
+.btnQuiet:hover:not(:disabled) {
+  background: var(--stone-1);
+  color: var(--chalk);
+}
+
+/* 되돌릴 수 없는 동작을 확인받는 동안의 모습 */
+.btnDanger {
+  background: var(--warn);
+  border-color: var(--warn);
+  color: var(--stone-0);
+}
+.btnDanger:hover:not(:disabled) {
+  background: var(--warn);
+}
+
+.select {
+  background: var(--stone-1);
+  border: 1px solid var(--stone-edge);
+  border-radius: 2px;
+  padding: 0.35rem 0.5rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ---------- 시작 화면 ---------- */
+
+.intro {
+  color: var(--chalk-dim);
+  max-width: 32rem;
+}
+.lockNote {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--chalk-dim);
+}
+
+/* ---------- 상태줄 ---------- */
+
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--stone-2);
+  border-bottom: 1px solid var(--stone-2);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+.stat {
+  display: flex;
+  gap: 0.35rem;
+  align-items: baseline;
+}
+.statLabel {
+  color: var(--chalk-dim);
+  font-size: 0.8rem;
+}
+.statValue {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.statLow {
+  color: var(--warn);
+}
+
+/* ---------- 격자 ---------- */
+
+/* 칸을 고정 크기로 두면 열이 늘었을 때 화면 밖으로 나간다.
+   칸을 1fr 로 두고 정사각(aspect-ratio)만 지켜서, 열 수가 몇이든 폭에 맞게 줄어들게 한다.
+   최대 크기는 바깥에서 max-width 로 잡아 준다. */
+.board {
+  display: grid;
+  gap: var(--gap);
+  padding: var(--gap);
+  background: var(--stone-1);
+  border: 1px solid var(--stone-edge);
+  width: 100%;
+}
+
+.void {
+  aspect-ratio: 1;
+}
+
+.cell {
+  position: relative;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  transition: transform var(--dur) ease;
+}
+.cell:disabled {
+  cursor: default;
+}
+.cell:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+  z-index: 2;
+}
+
+/* 석판 — 밝은 석회암. 결은 그라디언트 두 겹으로만 낸다 (무늬 이미지 없음) */
+.stone {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, var(--slab-1) 0%, var(--slab-2) 55%, var(--slab-3) 100%);
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+/* 실금 — 석판마다 각도가 조금씩 다르다 (--seed 로 흔든다) */
+.stone::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    calc(28deg + var(--seed, 0) * 1deg),
+    transparent 46%,
+    var(--crack) 46.6%,
+    var(--crack) 47.1%,
+    transparent 47.7%
+  );
+  opacity: 0.35;
+}
+
+/* 왜곡 석판 — 검은 현무암. 색만이 아니라 모양(육각)과 글자로도 구분한다 (SPEC §6) */
+.distorted {
+  --crack: var(--dark-crack);
+}
+.distorted .stone {
+  clip-path: polygon(50% 0, 100% 26%, 100% 74%, 50% 100%, 0 74%, 0 26%);
+  background: linear-gradient(160deg, var(--dark-1) 0%, var(--dark-2) 100%);
+  border-color: transparent;
+  box-shadow: none;
+}
+.distorted .stone::after {
+  opacity: 0.5;
+}
+
+/* 부서진 칸 — 아무것도 놓을 수 없다 */
+.empty .stone {
+  background: transparent;
+  border: 1px dashed rgba(217, 213, 204, 0.12);
+  box-shadow: none;
+}
+.empty .stone::after {
+  display: none;
+}
+
+/* 칸 안 글자는 칸 너비에 비례한다 (cqw). 칸이 작아져도 넘치지 않는다 */
+.cell {
+  container-type: inline-size;
+}
+
+.glyph {
+  position: relative;
+  font-size: 0.85rem;
+  font-size: 40cqw;
+  line-height: 1;
+  color: var(--slab-ink);
+  pointer-events: none;
+}
+.glyphDistorted {
+  color: #e8e4da;
+  font-weight: 700;
+}
+.glyphEmpty {
+  color: rgba(217, 213, 204, 0.2);
+}
+.blessing {
+  position: relative;
+  font-size: 0.7rem;
+  font-size: 34cqw;
+  font-weight: 700;
+  color: var(--bless-ink, var(--slab-1));
+  background: var(--bless, var(--slab-ink));
+  border-radius: 1px;
+  padding: 0 0.2rem;
+  pointer-events: none;
+}
+
+/* 특수 석판 — 매 턴 자리가 바뀌므로 어디로 갔는지 바로 보여야 한다 (SPEC §4.5).
+   테두리와 배지를 효과마다 다른 색으로 칠한다. 색은 --bless 로 칸마다 실려 온다.
+   상태줄의 '특수칸 ○○' 도 같은 색이라 색과 이름이 저절로 짝지어진다. */
+.hasBlessing .stone {
+  box-shadow: inset 0 0 0 2px var(--bless, var(--slab-ink)), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+/* ---------- 범위 미리보기 (SPEC §6) ----------
+   부술 수 있는 칸이 한눈에 들어오도록, 범위 안은 채우고 범위 밖은 낮춘다. */
+
+/* 미리보기 중에는 범위 밖 석판을 어둡게 내린다 */
+.previewing .cell:not(.inRange) {
+  opacity: 0.38;
+}
+.previewing .cell.inRange {
+  z-index: 1;
+}
+
+/* 확정 파괴 — 더 하얗게 채우고 굵은 검은 테두리 */
+.fxCertain .stone {
+  background: linear-gradient(160deg, #fffdf6 0%, #ece6d8 60%, #d8d1c0 100%);
+  border: 2px solid var(--slab-ink);
+}
+.fxCertain .stone::after {
+  opacity: 0.8;
+}
+
+/* 확률 파괴 — 빗금과 점선. 확정과 한눈에 달라 보이게 한다 */
+.fxChance .stone {
+  background: repeating-linear-gradient(
+    45deg,
+    #cfc8b8 0 4px,
+    #ada593 4px 8px
+  );
+  border: 2px dashed rgba(36, 33, 28, 0.7);
+}
+.fxChance .stone::after {
+  opacity: 0.25;
+}
+
+/* 왜곡 피격 — 이 게임의 핵심 경고 */
+.fxDistortedHit .stone {
+  background: linear-gradient(160deg, #9c5138 0%, #7a3d2b 100%);
+  border: 2px solid var(--warn);
+}
+.fxDistortedHit::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border: 2px solid var(--warn);
+  pointer-events: none;
+}
+
+/* 정화·공명으로 왜곡을 부수는 경우 — 검은 칸이지만 부술 수 있다는 표시 */
+.fxDistortedDestroy .stone {
+  background: linear-gradient(160deg, #3a3a3f 0%, #232326 100%);
+  border: 2px solid var(--chalk);
+}
+
+/* 레벨 3이라 왜곡을 건드리지 않는 경우 */
+.fxDistortedSafe {
+  opacity: 0.4;
+}
+
+/* 칸 모서리 표시 — 확 / 50% / ⚠ */
+.mark {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  z-index: 2;
+  font-size: 0.55rem;
+  font-size: 30cqw;
+  line-height: 1.35;
+  padding: 0 2px;
+  color: #14171a;
+  background: var(--chalk);
+  pointer-events: none;
+}
+.markWarn {
+  background: var(--warn);
+  color: #17100c;
+  font-weight: 700;
+  /* 확률 피격은 "⚠70%" 처럼 글자가 길다. 다른 뱃지와 같은 크기면 칸을 넘친다. */
+  font-size: 0.5rem;
+  font-size: 24cqw;
+}
+
+/* 시전 지점 */
+.origin::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px solid var(--ink);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* 모바일에서 첫 탭으로 찍어 둔 칸 */
+.armed::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px dashed var(--ink);
+  pointer-events: none;
+}
+
+/* ---------- 파괴 이펙트 (SPEC §6) ----------
+   시작 시각은 칸마다 다르다. --fx-delay 는 시전 지점에서 얼마나 떨어졌는지에 따라
+   BoardView 가 넣어 준다. 가까운 칸부터 부서져서 바깥으로 번져 나가 보인다.
+   덤으로 거리 감쇠 규칙(가까울수록 잘 부서진다)이 눈으로 읽힌다. */
+
+/* 부서지는 칸은 이웃 위로 올라온다 — 파편이 잘려 보이지 않게 */
+.breaking {
+  z-index: 4;
+}
+
+/* 부서질 때 칸은 이미 empty 라서 .stone 은 투명한 점선 테두리뿐이다.
+   그게 바로 튀어나오면 "부서졌다"가 아니라 "갑자기 바뀌었다"로 보이므로,
+   이펙트가 끝날 때까지 눌러 두었다가 마지막에 드러낸다. */
+.breaking .stone,
+.breaking .glyph {
+  animation: emptied var(--fx-dur) ease-out var(--fx-delay, 0ms) both;
+}
+@keyframes emptied {
+  0%,
+  72% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* 석판의 잔상 — 사라진 석판을 이 자리에 잠깐 다시 그리고 터뜨린다 */
+.shards {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* 계열은 이 세 색만 갈아 끼운다. 기본값은 원래 석판 색이다. */
+  --fx-a: var(--slab-1);
+  --fx-b: var(--slab-2);
+  --fx-c: var(--slab-3);
+  background: linear-gradient(160deg, var(--fx-a) 0%, var(--fx-b) 55%, var(--fx-c) 100%);
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  animation: burst var(--fx-dur) ease-out var(--fx-delay, 0ms) both;
+}
+
+/* 계열마다 쓰는 덧층 — 번개 줄기, 폭발 파문, 물결 따위를 여기에 그린다.
+   기본은 아무것도 그리지 않는다. */
+.shards::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+@keyframes burst {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  22% {
+    transform: scale(1.07);
+    opacity: 1;
+    filter: brightness(1.6);
+  }
+  100% {
+    transform: scale(0.62);
+    opacity: 0;
+  }
+}
+
+/* 파편 — 요소 하나에 그림자 넷을 달고 통째로 키워서 사방으로 날린다.
+   transform 과 opacity 만 움직이므로 15x15 에서 200칸이 동시에 터져도 부담이 없다.
+   길이는 cqw 라서 칸이 작아지면 파편도 같이 작아진다. */
+.shards::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 13cqw;
+  height: 13cqw;
+  margin: -6.5cqw 0 0 -6.5cqw;
+  background: var(--fx-b);
+  box-shadow:
+    -21cqw -18cqw 0 0 var(--fx-a),
+    19cqw -22cqw 0 0 var(--fx-c),
+    -22cqw 20cqw 0 0 var(--fx-b),
+    18cqw 19cqw 0 0 var(--fx-a);
+  animation: shards calc(var(--fx-dur) + 60ms) ease-out var(--fx-delay, 0ms) both;
+}
+@keyframes shards {
+  0% {
+    transform: scale(0.3) rotate(0deg);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    /* --seed 는 칸마다 다른 값이라 파편이 도는 방향이 조금씩 어긋난다 */
+    transform: scale(2) rotate(calc(var(--seed, 0) * 3deg));
+    opacity: 0;
+  }
+}
+
+
+/* ---------- 정령 계열별 타격 이펙트 (SPEC §6) ----------
+   규칙은 건드리지 않는다. 색과 방향만 갈아 끼워 "이름대로 터지게" 한다.
+   움직이는 건 transform 과 opacity 뿐이라 15×15 에서 200칸이 동시에 터져도 견딘다. */
+
+/* 불 — 업화 · 분출. 주황 불꽃이 아래에서 위로 솟구친다 */
+.mFire .shards {
+  --fx-a: #ffe0ad;
+  --fx-b: #f0913f;
+  --fx-c: #b4441a;
+  animation-name: burstFire;
+}
+.mFire .shards::after {
+  animation-name: shardsFire;
+}
+@keyframes burstFire {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.06) translateY(-6%);
+    opacity: 1;
+    filter: brightness(1.7);
+  }
+  100% {
+    transform: scale(0.7) translateY(-32%);
+    opacity: 0;
+  }
+}
+@keyframes shardsFire {
+  0% {
+    transform: scale(0.3) translateY(10%);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.7) translateY(-70%);
+    opacity: 0;
+  }
+}
+
+/* 번개 — 낙뢰 · 벼락. 흰 섬광이 위에서 꽂히고 세로 줄기가 스친다 */
+.mBolt .shards {
+  --fx-a: #ffffff;
+  --fx-b: #dfe9ff;
+  --fx-c: #9fb4e8;
+  animation-name: burstBolt;
+}
+.mBolt .shards::before {
+  left: 44%;
+  right: 44%;
+  top: -90%;
+  bottom: 0;
+  background: linear-gradient(180deg, transparent, #ffffff 60%, transparent);
+  animation: boltStreak calc(var(--fx-dur) * 0.7) ease-out var(--fx-delay, 0ms) both;
+}
+@keyframes burstBolt {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    filter: brightness(2.4);
+  }
+  30% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+@keyframes boltStreak {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.2);
+  }
+  20% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(1);
+  }
+}
+
+/* 폭발 — 충격파 · 대폭발. 시전 지점에서 원형 파문이 퍼진다 */
+.mBlast .shards {
+  --fx-a: #fff3d6;
+  --fx-b: #e8b970;
+  --fx-c: #b07c34;
+}
+.mBlast .shards::before {
+  border: 2px solid #fff3d6;
+  border-radius: 50%;
+  animation: blastRing calc(var(--fx-dur) + 80ms) ease-out var(--fx-delay, 0ms) both;
+}
+@keyframes blastRing {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+/* 바람 — 용오름 · 폭풍우. 회전하며 빨려 들어간다 */
+.mWind .shards {
+  --fx-a: #e6f0f2;
+  --fx-b: #b9ccd2;
+  --fx-c: #8aa3ac;
+  animation-name: burstWind;
+}
+.mWind .shards::after {
+  animation-name: shardsWind;
+}
+@keyframes burstWind {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.35) rotate(140deg);
+    opacity: 0;
+  }
+}
+@keyframes shardsWind {
+  0% {
+    transform: scale(0.4) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5) rotate(220deg);
+    opacity: 0;
+  }
+}
+
+/* 땅 — 지진. 가로로 흔들리며 균열이 옆으로 번진다 */
+.mEarth .shards {
+  --fx-a: #d8cbb0;
+  --fx-b: #a89170;
+  --fx-c: #6f5c42;
+  animation-name: burstEarth;
+}
+.mEarth .shards::before {
+  top: 46%;
+  bottom: 46%;
+  background: #2b2318;
+  animation: earthCrack var(--fx-dur) ease-out var(--fx-delay, 0ms) both;
+}
+@keyframes burstEarth {
+  0% {
+    transform: translateX(0) scale(1);
+  }
+  20% {
+    transform: translateX(-8%) scale(1.02);
+    opacity: 1;
+  }
+  55% {
+    transform: translateX(7%) scale(0.96);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(0) scale(0.85);
+    opacity: 0;
+  }
+}
+@keyframes earthCrack {
+  0% {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  35% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+/* 물 — 해일. 푸른 물결이 십자로 밀려나간다 */
+.mWater .shards {
+  --fx-a: #dff0f7;
+  --fx-b: #7fb6d4;
+  --fx-c: #3d7ea3;
+  animation-name: burstWater;
+}
+.mWater .shards::after {
+  /* 대각선 대신 상하좌우로 흩어져 물결처럼 보이게 한다 */
+  box-shadow:
+    0 -26cqw 0 0 var(--fx-a),
+    26cqw 0 0 0 var(--fx-b),
+    0 26cqw 0 0 var(--fx-a),
+    -26cqw 0 0 0 var(--fx-b);
+}
+@keyframes burstWater {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  30% {
+    transform: scaleX(1.15) scaleY(0.85);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(0.6) scaleY(1.2);
+    opacity: 0;
+  }
+}
+
+/* 빛 — 정화 · 세계수의 공명. 흰빛에 씻겨 사라진다 (파편이 튀지 않는다) */
+.mLight .shards {
+  --fx-a: #ffffff;
+  --fx-b: #f2efe4;
+  --fx-c: #d6cfbb;
+  animation-name: burstLight;
+}
+.mLight .shards::after {
+  display: none;
+}
+.mLight .shards::before {
+  background: radial-gradient(circle, #ffffff 0%, transparent 70%);
+  animation: lightBloom calc(var(--fx-dur) + 60ms) ease-out var(--fx-delay, 0ms) both;
+}
+@keyframes burstLight {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    filter: brightness(1);
+  }
+  35% {
+    transform: scale(1.04);
+    opacity: 1;
+    filter: brightness(2.2) saturate(0);
+  }
+  100% {
+    transform: scale(1.1);
+    opacity: 0;
+    filter: brightness(2.2) saturate(0);
+  }
+}
+@keyframes lightBloom {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+/* 되살아남 — 파괴가 끝난 뒤 한 장씩 차례로 내려앉는다 */
+.appearing .stone {
+  animation: settle var(--fx-dur) cubic-bezier(0.2, 0.9, 0.3, 1.25) var(--fx-delay, 0ms) both;
+}
+@keyframes settle {
+  0% {
+    transform: scale(0.15) rotate(-10deg);
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* 왜곡을 때렸다 — 부서지지 않고 붉게 두 번 번쩍인다.
+   석판 3개가 되살아나는 원인이므로 반드시 눈에 띄어야 한다 (SPEC §4.3). */
+.hitting .stone {
+  animation: reject 380ms ease-out both;
+}
+@keyframes reject {
+  0%,
+  100% {
+    background: linear-gradient(160deg, var(--dark-1) 0%, var(--dark-2) 100%);
+    box-shadow: none;
+  }
+  20%,
+  62% {
+    background: linear-gradient(160deg, var(--warn) 0%, #7d3f28 100%);
+    box-shadow: 0 0 0 2px var(--warn);
+  }
+  42% {
+    background: linear-gradient(160deg, var(--dark-1) 0%, var(--dark-2) 100%);
+    box-shadow: none;
+  }
+}
+
+/* 왜곡을 때리면 판 전체가 한 번 흔들린다 */
+.shaking {
+  animation: shake 260ms ease-in-out;
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-3px);
+  }
+  48% {
+    transform: translateX(3px);
+  }
+  74% {
+    transform: translateX(-2px);
+  }
+}
+
+/* ---------- 손패 ---------- */
+
+.hand {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.card {
+  flex: 1 1 12rem;
+  /* 범위 그림 + 글 두 칸으로 나눈다 */
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  /* 설명글 길이가 정령마다 달라 카드 높이가 들쭉날쭉해진다. 격자 옆에 세로로
+     쌓이므로 두 장 높이를 맞춘다. 가장 긴 설명(거리 감쇠 정령)이 옆칸 폭에서
+     두 줄이 되므로 그 높이에 맞춘다. */
+  min-height: 5.5rem;
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  background: var(--stone-1);
+  border: 1px solid var(--stone-2);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: border-color var(--dur) ease, background var(--dur) ease;
+}
+.card:hover:not(:disabled) {
+  background: var(--stone-2);
+}
+.card:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.cardOn {
+  border-color: var(--ink);
+  background: var(--stone-2);
+}
+.cardBody {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------- 손패 범위 미리보기 (SPEC §6) ----------
+   확정으로 부수는 칸은 빨강, 확률로만 부수는 칸은 회색.
+   회색은 진할수록 확률이 높다. */
+.mini {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  width: 3.6rem;
+  padding: 2px;
+  background: var(--stone-0);
+  border: 1px solid var(--stone-2);
+  border-radius: 2px;
+}
+.miniCell {
+  aspect-ratio: 1;
+  background: rgba(217, 213, 204, 0.11);
+  border-radius: 1px;
+}
+.miniCertain {
+  background: var(--mini-certain);
+}
+.miniChance {
+  background: var(--chalk-dim);
+}
+
+.cardName {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-weight: 700;
+}
+/* 강화 단계는 배지로 (SPEC §6) */
+.lv {
+  font-size: 0.7rem;
+  padding: 0 0.3rem;
+  border: 1px solid var(--chalk-dim);
+  color: var(--chalk-dim);
+}
+.lv3 {
+  border-color: var(--chalk);
+  color: var(--chalk);
+}
+.cardHint {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--chalk-dim);
+}
+
+.queue {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.queueItem {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  flex: 1 1 9rem;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.9rem;
+  background: var(--stone-0);
+  border: 1px dashed var(--stone-2);
+  border-radius: 2px;
+}
+@media (min-width: 900px) {
+  .queue {
+    flex-direction: column;
+  }
+  .queueItem {
+    flex: 0 0 auto;
+  }
+}
+.queueNo {
+  color: var(--chalk-dim);
+  font-size: 0.85rem;
+}
+.queueName {
+  flex: 1;
+  color: var(--chalk);
+}
+
+/* 격자 위 요약 줄 — 작은 회색 글씨로는 눈에 안 들어와서 키웠다 */
+.hintLine {
+  margin: 0.6rem 0 0;
+  font-size: 0.95rem;
+  color: var(--chalk);
+  min-height: 1.7em;
+  padding: 0.35rem 0.6rem;
+  background: var(--stone-1);
+  border-left: 3px solid var(--stone-3);
+}
+.warnLine {
+  margin: 0.6rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--warn);
+  min-height: 1.7em;
+  padding: 0.35rem 0.6rem;
+  background: rgba(194, 112, 79, 0.12);
+  border-left: 3px solid var(--warn);
+}
+
+/* ---------- 결과 ---------- */
+
+.modalBack {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 11, 13, 0.78);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  z-index: 10;
+}
+.modal {
+  width: min(24rem, 100%);
+  background: var(--stone-1);
+  border: 1px solid var(--stone-2);
+  padding: 1.25rem;
+}
+.modalTitle {
+  margin: 0 0 0.25rem;
+  font-size: 1.35rem;
+}
+/* 최고 기록을 갱신했을 때만 뜨는 줄. 결과창에서 제일 반가운 소식이라 눈에 띄게 둔다 */
+.gradeUp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin: 0 0 0.6rem;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.92rem;
+  color: var(--chalk);
+  background: rgba(211, 165, 46, 0.14);
+  border: 1px solid rgba(211, 165, 46, 0.5);
+  border-radius: 2px;
+}
+.gradeUpFrom {
+  color: var(--chalk-dim);
+  text-decoration: line-through;
+}
+
+.modalSub {
+  margin: 0 0 1rem;
+  color: var(--chalk-dim);
+  font-size: 0.9rem;
+}
+.grade {
+  letter-spacing: 0.2em;
+  font-size: 1.5rem;
+}
+
+/* ---------- 통계 ---------- */
+
+.panel {
+  margin-top: 2rem;
+  border-top: 1px solid var(--stone-2);
+  padding-top: 1rem;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.table th,
+.table td {
+  text-align: right;
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--stone-2);
+}
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+}
+.table th {
+  color: var(--chalk-dim);
+  font-weight: 400;
+  font-size: 0.78rem;
+}
+.total td {
+  font-weight: 700;
+  border-bottom: 0;
+}
+.muted {
+  color: var(--chalk-dim);
+}
+
+.log {
+  margin-top: 1.5rem;
+  font-size: 0.82rem;
+  color: var(--chalk-dim);
+}
+.log ol {
+  margin: 0.5rem 0 0;
+  padding-left: 1.4rem;
+}
+
+/* ---------- 좁은 화면 ---------- */
+
+@media (max-width: 480px) {
+  .page {
+    padding: 1rem 0.6rem 2.5rem;
+  }
+  .board {
+    justify-content: center;
+    width: 100%;
+  }
+  .card {
+    flex: 1 1 100%;
+  }
+}

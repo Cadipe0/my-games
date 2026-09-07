@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>게임 모음</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="shell wide">
+  <header class="hub-head">
+    <h1><em>게임 모음</em></h1>
+    <p class="hub-greet" id="hub-greet">하고 싶은 게임을 골라주세요.</p>
+    <div class="row hub-actions">
+      <a class="btn ghost small" href="ranking.html">🏆 랭킹</a>
+      <button type="button" class="btn ghost small" id="hub-rename">이름 정하기</button>
+      <button type="button" class="small" id="hub-reset">전체 기록 초기화</button>
+    </div>
+  </header>
+
+  <nav class="hub-grid">
+    <a class="game-card" href="omok.html" data-game="omok">
+      <span class="icon">⚫</span>
+      <h2>오목</h2>
+      <p>15 × 15 판에서 컴퓨터와 다섯 목을 겨룹니다. 돌 색은 매 판 추첨.</p>
+      <span class="meta">1인 · 대전</span>
+      <span class="card-record" hidden></span>
+    </a>
+
+    <a class="game-card" href="blackjack.html" data-game="blackjack">
+      <span class="icon">🃏</span>
+      <h2>블랙잭</h2>
+      <p>딜러와 칩을 걸고 겨루는 카드 게임. 베팅, 더블다운, 난이도 선택.</p>
+      <span class="meta">1인 · 카드</span>
+      <span class="card-record" hidden></span>
+    </a>
+
+    <a class="game-card" href="tikatuka.html" data-game="tikatuka">
+      <span class="icon">🎲</span>
+      <h2>티카투카</h2>
+      <p>3×3 판에서 주사위를 번갈아 놓아 줄 합을 겨룹니다. 이길수록 상대가 강해집니다.</p>
+      <span class="meta">1인 · 주사위</span>
+      <span class="card-record" hidden></span>
+    </a>
+
+    <a class="game-card" href="number.html" data-game="number">
+      <span class="icon">🔢</span>
+      <h2>숫자 맞추기</h2>
+      <p>정해진 범위 안의 숫자를 추리합니다. 난이도에 따라 범위가 달라집니다.</p>
+      <span class="meta">1인 · 추리</span>
+      <span class="card-record" hidden></span>
+    </a>
+
+    <a class="game-card" href="adventure.html" data-game="adventure">
+      <span class="icon">🌲</span>
+      <h2>텍스트 게임</h2>
+      <p>선택과 소지품, 체력이 결말을 바꾸는 텍스트 어드벤처. 전투도 있습니다.</p>
+      <span class="meta">1인 · 어드벤처</span>
+      <span class="card-record" hidden></span>
+    </a>
+
+    <a class="game-card" href="puzzle/dist/index.html" data-game="puzzle">
+      <span class="icon">🗿</span>
+      <h2>석판 부수기</h2>
+      <p>정령을 소환해 격자의 석판을 부숩니다. 왜곡된 석판을 건드리면 되살아납니다.</p>
+      <span class="meta">1인 · 퍼즐</span>
+      <span class="card-record" hidden></span>
+    </a>
+  </nav>
+</div>
+
+<script src="nickname.js"></script>
+<script src="scores.js"></script>
+<script src="reset-ui.js"></script>
+<script src="hub.js"></script>
+
+</body>
+</html>
