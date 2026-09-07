@@ -53,16 +53,51 @@ git push -u origin main
 ### Render
 
 `render.yaml` 이 저장소에 들어 있다. 대시보드에서 **New > Blueprint** 로 이
-저장소를 고르면 그대로 만들어진다. 손으로 만든다면 이렇게 넣는다.
+저장소를 고르면 그대로 만들어진다.
+
+지금 설정은 **무료 플랜**이다. 동작을 보기에는 충분하지만 기록이 남지 않는다.
 
 | 항목 | 값 |
 |---|---|
 | Root Directory | `server` |
 | Build Command | `pip install -r requirements.txt` |
 | Start Command | `uvicorn main:app --host 0.0.0.0 --port $PORT` |
-| Disk | Mount Path `/var/data`, 1GB |
-| 환경변수 `DATA_DIR` | `/var/data` |
-| 환경변수 `PYTHON_VERSION` | `3.13.15` |
+| Plan | `free` |
+
+무료 플랜에서 겪게 되는 것:
+
+- **배포하거나 서버가 재시작되면 기록이 전부 사라진다.** 파일 시스템이
+  임시 저장소라서다.
+- 15 분쯤 아무도 안 들어오면 서버가 잠든다. 그다음 첫 접속이 수십 초 걸린다
+  (그동안 화면이 안 뜬다). 두 번째부터는 평소 속도다.
+
+### 기록을 남기려면 (유료로 올릴 때)
+
+디스크는 유료 플랜에만 붙는다. Render 대시보드에서 플랜을 올린 뒤,
+`render.yaml` 아래쪽 주석에 적어 둔 세 덩이를 되살리고 다시 푸시한다.
+
+```yaml
+plan: starter
+
+disks:
+  - name: data
+    mountPath: /var/data
+    sizeGB: 1
+
+envVars:
+  - key: DATA_DIR
+    value: /var/data
+```
+
+`DATA_DIR` 이 붙는 순간부터 `scores.db` 가 그 디스크에 만들어지고, 다시
+배포해도 남는다. 그 전에 쌓인 기록은 옮겨지지 않는다.
+
+### 파이썬 버전
+
+일부러 고정하지 않았다. 정확한 패치 버전(`3.13.15` 처럼)을 박아 두면 Render 가
+그 버전을 갖고 있지 않을 때 빌드가 그 자리에서 실패한다. 이 서버는 3.10
+이상이면 돌아가므로 기본값에 맡긴다. 꼭 고정해야 하면 `server/.python-version`
+에 적는다.
 
 ### Railway
 
