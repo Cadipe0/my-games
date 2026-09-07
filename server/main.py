@@ -21,7 +21,7 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, FastAPI, Header, HTTPException, Query, Request
+from fastapi import APIRouter, Body, Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -328,18 +328,34 @@ def ranking(
 # 형식은 예전 그대로 두고 저장 위치만 서버로 옮긴다.
 
 
-@api.get("/blobs/{key}", response_model=BlobOut)
+@api.get(
+    "/blobs/{key}",
+    response_model=BlobOut,
+    responses={204: {"description": "아직 저장된 값이 없다 (오류가 아니다)"}},
+)
 def get_blob(
     key: str,
     pid: str = Depends(player_id),
     conn: sqlite3.Connection = Depends(get_db),
-) -> BlobOut:
+):
+    """저장해 둔 값을 돌려준다. 아직 없으면 204 다.
+
+    "아직 아무것도 안 했다" 는 정상이지 오류가 아니다. 게임을 처음 열면
+    도감도 퍼즐 통계도 당연히 비어 있고, 그때마다 로그에 404 가 쌓이면
+    진짜 문제를 찾을 때 방해가 된다. 그래서 204(내용 없음)로 답한다.
+
+    404 가 아니라 204 를 고른 이유가 하나 더 있다. web/scores.js 가 이미
+    204 를 "값 없음" 으로 처리하고 있어서, 브라우저에 예전 파일이 캐시로
+    남아 있어도 그대로 동작한다. 200 에 빈 값을 실어 보내면 예전 코드가
+    그 빈 값을 진짜 값으로 알고 돌려줘서 도감 화면이 터진다.
+
+    부른 쪽은 이걸 받고 loadBlob(key, 기본값) 의 기본값을 쓴다.
+    """
     row = conn.execute(
         "SELECT value FROM blobs WHERE player_id = ? AND key = ?", (pid, key)
     ).fetchone()
     if row is None:
-        # 없으면 404. 클라이언트는 이걸 받고 fallback 을 쓴다 (loadBlob 의 약속)
-        raise HTTPException(status_code=404, detail="없는 키입니다")
+        return Response(status_code=204)
     return BlobOut(key=key, value=json.loads(row["value"]))
 
 

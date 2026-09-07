@@ -85,7 +85,9 @@ async function req(method: string, key: string, body?: unknown): Promise<unknown
     init.body = JSON.stringify(body);
   }
   const res = await fetch(API + '/blobs/' + encodeURIComponent(key), init);
-  if (res.status === 404) return null; // 아직 없는 값 — 부른 쪽이 기본값을 쓴다
+  // 아직 저장된 게 없다는 뜻. 부른 쪽이 기본값을 쓴다.
+  // 204 가 지금 서버의 답이고, 404 는 예전 서버에 붙을 때를 위해 남겨 둔다.
+  if (res.status === 204 || res.status === 404) return null;
   if (!res.ok) throw new Error('서버 ' + res.status);
   return res.json();
 }
