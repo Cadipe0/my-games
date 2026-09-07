@@ -37,7 +37,7 @@
 
     tikatuka: function () {
       return GameScore.best("tikatuka").then(function (b) {
-        return b ? "최고 " + b.score + "판 도달 · " + b.detail.bestStreak + "연승" : "";
+        return b ? "최고 " + b.score + "연승 · " + b.detail.round + "판 도달" : "";
       });
     },
 

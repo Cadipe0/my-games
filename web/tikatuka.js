@@ -95,6 +95,7 @@ let streak;         // 연승
 /* 기록은 한 세션(처음부터 다시 하기 전까지) 단위다.
    세션은 명확히 끝나지 않으므로, 판이 끝날 때마다 같은 id 로 덮어써서
    중간에 브라우저를 닫아도 여기까지 온 기록이 남게 한다. */
+let offeredStreak = 0;   // 이름을 물어본 마지막 연승 기록 (같은 값으로 또 묻지 않으려고)
 let sessionId = null;
 let sessionStartedAt = 0;
 let bestStreak = 0;
@@ -728,6 +729,7 @@ function npcLevel() {
 }
 
 function startRound(keepOpponent) {
+  saveResume(true);   // 지금부터 판 도중이다 (여기서 닫으면 패배로 친다)
   board = { me: [[], [], []], npc: [[], [], []] };
   rerollUsed = { me: false, npc: false };
   phase = "place";
@@ -1123,6 +1125,8 @@ function finishRound(surrendered) {
   render();
   if (!surrendered) log("결과 — " + detail.join(" · "), "hi");
 
+  const streakBefore = streak;   // 이번 판 전까지 이어오던 연승
+
   let outcome;
   if (surrendered) {
     losses++;
@@ -1152,7 +1156,23 @@ function finishRound(surrendered) {
   }
 
   renderStreak();
-  saveSession();
+  saveResume(false);   // 판이 끝났다. 여기서 닫으면 그대로 이어할 수 있다
+
+  /* 이름을 묻는 순간 — 연승이 끊길 때다.
+
+     이 게임은 세션이 계속 이어져서 "끝" 이 없지만, 연승만은 지는 순간
+     확정된다. 그래서 그때가 오락실 기계로 치면 하이스코어가 굳는 자리다.
+
+     세 가지가 다 맞아야 묻는다.
+       1) 이번 판에 연승이 끊겼다 (이겼으면 아직 진행 중이라 묻지 않는다)
+       2) 끊긴 그 연승이 이번 세션의 최고 기록이었다 (5 연승 뒤의 2 연승은 아니다)
+       3) 그 기록으로 아직 안 물어봤다 (같은 값으로 두 번 묻지 않는다)
+     그러고도 랭킹 10 위 밖이면 GameHighScore 가 알아서 조용히 넘어간다. */
+  const streakEnded = outcome !== "win" && streakBefore > 0;
+  const newRecord = streakEnded && streakBefore === bestStreak && bestStreak > offeredStreak;
+  if (newRecord) offeredStreak = bestStreak;
+
+  saveSession({ askName: newRecord });
 
   roundActionsEl.innerHTML = "";
   const next = document.createElement("button");
@@ -1171,6 +1191,7 @@ function finishRound(surrendered) {
   reset.textContent = "처음부터";
   reset.addEventListener("click", () => {
     newSession();
+    clearResume();      // 하던 판을 정말 버리는 자리
     showMatching();
   });
   roundActionsEl.appendChild(reset);
@@ -1186,18 +1207,106 @@ function newSession() {
   losses = 0;
   streak = 0;
   bestStreak = 0;
+  offeredStreak = 0;
   usedNames = new Set();
   sessionId = null;
   sessionStartedAt = Date.now();
+  // 저장본은 여기서 지우지 않는다. 페이지를 열 때도 이 함수가 도는데,
+  // 사용자가 "이어서 할지" 답하기 전에 지워 버리면 그 사이에 창을 닫았을 때
+  // 하던 판이 영영 사라진다. 버리는 건 정말 버리기로 한 자리에서만 한다.
 }
 
-/* 지금까지의 세션을 저장한다. 대표 점수는 도달한 판 수다 —
-   이겨야만 다음 판으로 넘어가므로 얼마나 깊이 갔는지를 그대로 나타낸다. */
-function saveSession() {
+/* ---------- 하던 판 이어하기 ----------
+
+   기록(랭킹에 오르는 점수)이 아니라 "하던 판" 이라서 브라우저에만 둔다.
+   어드벤처의 이어하기(lostforest.save)와 같은 성격이다.
+
+   inRound 가 이어하기의 핵심이다. 판을 시작할 때 켜고 끝낼 때 끄므로,
+   다시 열었을 때 이 값이 켜져 있으면 "두던 도중에 창을 닫았다" 는 뜻이다.
+   그 판은 패배로 친다 — 안 그러면 질 것 같을 때 창을 닫아 연승을 지킬 수
+   있고, 그러면 연승으로 순위를 매기는 의미가 사라진다. 게임에 이미 있는
+   "포기 = 패배" 와 같은 처리다. */
+
+const RESUME_KEY = "tikatuka.session";
+
+function storage(fn, fallback) {
+  try { return fn(); } catch (e) { return fallback; }
+}
+
+function saveResume(inRound) {
+  storage(function () {
+    localStorage.setItem(RESUME_KEY, JSON.stringify({
+      v: 1,
+      round: round,
+      wins: wins,
+      losses: losses,
+      streak: streak,
+      bestStreak: bestStreak,
+      offeredStreak: offeredStreak,
+      sessionId: sessionId,
+      sessionStartedAt: sessionStartedAt,
+      usedNames: [].slice.call(usedNames),
+      inRound: !!inRound,
+    }));
+  });
+}
+
+function loadResume() {
+  const d = storage(function () {
+    return JSON.parse(localStorage.getItem(RESUME_KEY) || "null");
+  }, null);
+  if (!d || d.v !== 1 || typeof d.round !== "number") return null;
+  return d;
+}
+
+function clearResume() {
+  storage(function () { localStorage.removeItem(RESUME_KEY); });
+}
+
+// 저장해 둔 판을 지금 세션으로 되살린다. 돌려주는 값은 "그 판이 패배로 처리됐나".
+function applyResume(d) {
+  round = d.round;
+  wins = d.wins;
+  losses = d.losses;
+  streak = d.streak;
+  bestStreak = d.bestStreak;
+  offeredStreak = d.offeredStreak || 0;
+  sessionId = d.sessionId || null;
+  sessionStartedAt = d.sessionStartedAt || Date.now();
+  usedNames = new Set(d.usedNames || []);
+
+  if (!d.inRound) return false;
+
+  // 두던 도중에 닫았다 — 포기와 같게 본다
+  losses++;
+  streak = 0;
+  saveResume(false);
+  saveSession();     // 서버 기록도 이 패배를 반영해 둔다
+  return true;
+}
+
+/* 지금까지의 세션을 저장한다. 대표 점수는 이 세션에서의 최고 연승이다.
+
+   도달한 판 수로 매기지 않는 이유가 있다. 이 게임은 져도 잃는 게 없다 —
+   판 수는 이겼을 때만 오르고 졌다고 내려가지 않으므로(finishRound 참고),
+   결국 "누적 승수" 가 된다. 그러면 5 승 0 패와 5 승 5 패가 같은 점수가 되어,
+   시간만 쓰면 누구나 올릴 수 있는 값이 순위를 정하게 된다.
+
+   연승은 그렇게 안 된다. 판이 오를수록 상대가 강해지므로(LEVELS),
+   8 연승을 하려면 느긋함부터 명인까지 한 번도 안 지고 이겨야 한다.
+
+   대신 "얼마나 깊이 갔나" 가 점수에서 빠지므로, 그건 랭킹 줄 오른쪽에
+   판 수로 적어 함께 보여 준다.
+
+   한 판도 못 이겼으면 점수를 null 로 둔다. 0 연승은 겨룰 기록이 아니라서
+   순위표에 "0 연승" 줄이 쌓이면 보기만 나쁘다. 다른 게임에서 진 판을
+   랭킹에서 빼는 것과 같은 처리다 (거기서는 outcome 으로 걸렀지만 이
+   게임은 세션이 승패로 끝나지 않아 outcome 이 비어 있다). */
+function saveSession(opts) {
   GameScore.submit("tikatuka", {
     id: sessionId,               // 없으면 새로 만들어지고, 있으면 덮어쓴다
     outcome: "",                 // 세션은 승패로 끝나지 않는다
-    score: round,
+    score: bestStreak > 0 ? bestStreak : null,
     detail: {
       round: round,
       bestStreak: bestStreak,
@@ -1206,10 +1315,14 @@ function saveSession() {
       level: LEVEL_NAMES[npcLevel()],
       seconds: GameScore.since(sessionStartedAt),
     },
-  }).then((saved) => {
-    sessionId = saved.id;
-    showRecord();
-  });
+  })
+    .then((saved) => {
+      sessionId = saved.id;
+      if (!opts || !opts.askName) return null;
+      // 화면의 랭킹과 같은 조건(필터 없음)으로 순위를 본다
+      return GameHighScore.offer("tikatuka", saved, { what: saved.score + "연승" });
+    })
+    .then(showRecord);
 }
 
 function showRecord() {
@@ -1224,16 +1337,16 @@ function showRecord() {
     }
     let text = "지금까지 " + sum.plays + "번 도전";
     if (top) {
-      text += "  ·  최고 " + top.score + "판 도달 (최고 " +
-              top.detail.bestStreak + "연승 · " + top.detail.level + ")";
+      text += "  ·  최고 " + top.score + "연승 (" +
+              top.detail.round + "판 도달 · " + top.detail.level + ")";
     }
     recordEl.textContent = text;
   });
 
   // 난이도가 따로 없는 게임이라 전체를 한 줄로 세운다.
   GameRank.paint(rankEl, "tikatuka", {
-    title: "도달 판 수 랭킹",
-    note: (r) => r.detail.bestStreak + "연승",
+    title: "연승 랭킹",
+    note: (r) => r.detail.round + "판 도달",
   });
 }
 
@@ -1312,6 +1425,58 @@ function you() {
   return (window.GameNick && GameNick.name()) || "플레이어";
 }
 
+/* 하던 판이 있으면 이어할지 묻는다. 없으면 지금까지처럼 바로 시작한다. */
+function askResume(saved, onDone) {
+  const wrap = document.createElement("div");
+  wrap.className = "nick-overlay";
+  wrap.innerHTML =
+    '<div class="nick-box">' +
+      '<h2 class="nick-title">하던 판이 있습니다</h2>' +
+      '<p class="hint tk-resume-info"></p>' +
+      '<p class="nick-error tk-resume-warn" hidden></p>' +
+      '<div class="row nick-actions"></div>' +
+    "</div>";
+
+  wrap.querySelector(".tk-resume-info").textContent =
+    saved.round + "판 · " + saved.wins + "승 " + saved.losses + "패 · 최고 " +
+    saved.bestStreak + "연승";
+
+  if (saved.inRound) {
+    const warn = wrap.querySelector(".tk-resume-warn");
+    warn.hidden = false;
+    warn.textContent = "두던 도중에 나가서, 그 판은 패배로 기록됩니다.";
+  }
+
+  const actions = wrap.querySelector(".nick-actions");
+
+  const go = document.createElement("button");
+  go.type = "button";
+  go.className = "btn primary";
+  go.textContent = "이어서 하기";
+  go.addEventListener("click", function () {
+    applyResume(saved);
+    wrap.remove();
+    onDone();
+  });
+  actions.appendChild(go);
+
+  const fresh = document.createElement("button");
+  fresh.type = "button";
+  fresh.className = "btn ghost";
+  fresh.textContent = "처음부터";
+  fresh.addEventListener("click", function () {
+    newSession();
+    clearResume();      // 하던 판을 정말 버리는 자리
+    wrap.remove();
+    onDone();
+  });
+  actions.appendChild(fresh);
+
+  document.body.appendChild(wrap);
+  go.focus();
+}
+
+const saved = loadResume();   // newSession() 이 지우기 전에 읽어 둔다
 newSession();
 awaitingRoll = false;
 GameNick.require(function () {
@@ -1319,5 +1484,12 @@ GameNick.require(function () {
   myNameEl.textContent = you();
   vsMeEl.textContent = you();
   trayMeLabel.textContent = you() + "의 굴림판";
-  showMatching();
+
+  /* newSession() 이 이미 돌아 저장본을 지웠으므로, 그 전에 읽어 둔 것을 쓴다.
+     1판에 아무 것도 안 한 상태라면 이어할 게 없으니 묻지 않는다. */
+  if (saved && (saved.round > 1 || saved.wins > 0 || saved.losses > 0 || saved.inRound)) {
+    askResume(saved, function () { showRecord(); showMatching(); });
+  } else {
+    showMatching();
+  }
 });

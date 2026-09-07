@@ -25,8 +25,8 @@
     },
     {
       game: "tikatuka",
-      title: "🎲 티카투카 — 도달 판 수",
-      opts: { note: (r) => r.detail.bestStreak + "연승" },
+      title: "🎲 티카투카 — 최고 연승",
+      opts: { note: (r) => r.detail.round + "판 도달" },
     },
     {
       game: "number",
